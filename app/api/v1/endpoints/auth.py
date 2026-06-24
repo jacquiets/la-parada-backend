@@ -49,23 +49,29 @@ def register(body: RegisterRequest):
         )
 
     # 2. Buscar el rol_id por nombre en la tabla roles
-    rol_res = (
-        sb.table("roles")
-        .select("id, nombre")
-        .eq("nombre", body.rol_nombre)
-        .single()
-        .execute()
-    )
+    try:
+        rol_res = (
+            sb.table("roles")
+            .select("id, nombre")
+            .eq("nombre", body.rol_nombre)
+            .execute()
+        )
+    except Exception as e:
+        sb.auth.admin.delete_user(auth_user.id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error consultando la tabla de roles: {str(e)}"
+        )
 
     if not rol_res.data:
         # Revertir: eliminar el usuario de Auth si el rol no existe
         sb.auth.admin.delete_user(auth_user.id)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"El rol '{body.rol_nombre}' no existe.",
+            detail=f"El rol '{body.rol_nombre}' no existe en la base de datos de Supabase.",
         )
 
-    rol = rol_res.data
+    rol = rol_res.data[0]
 
     # 3. Insertar perfil en la tabla usuarios con estado = "activo"
     usuario_data = {
@@ -77,7 +83,14 @@ def register(body: RegisterRequest):
         "estado": "activo",
     }
 
-    insert_res = sb.table("usuarios").insert(usuario_data).execute()
+    try:
+        insert_res = sb.table("usuarios").insert(usuario_data).execute()
+    except Exception as e:
+        sb.auth.admin.delete_user(auth_user.id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error insertando en tabla usuarios: {str(e)}"
+        )
 
     if not insert_res.data:
         # Revertir: eliminar el usuario de Auth si falla la inserción de perfil
