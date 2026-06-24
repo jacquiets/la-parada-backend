@@ -8,18 +8,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "La Parada API"
     API_V1_STR: str = "/api/v1"
     
-    # Orígenes separados por comas o como JSON list
-    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000"]
-
-    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    @classmethod
-    def assemble_cors_origins(cls, v: str | list[str]) -> list[str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, str) and v.startswith("["):
-            import json
-            return json.loads(v)
-        return v
+    # Orígenes separados por comas
+    BACKEND_CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
     
     # Database
     # Railway provides DATABASE_URL environment variable natively for PostgreSQL
