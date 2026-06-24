@@ -161,23 +161,37 @@ def login(body: LoginRequest):
 
     auth_user = sign_in_res.user
 
-    # 2. Obtener perfil del usuario desde la tabla usuarios + rol
-    perfil_res = (
-        sb.table("usuarios")
-        .select("*, roles(nombre)")
-        .eq("auth_user_id", auth_user.id)
-        .single()
-        .execute()
-    )
+    # 2. Obtener perfil del usuario desde la tabla usuarios
+    try:
+        perfil_res = (
+            sb.table("usuarios")
+            .select("*")
+            .eq("auth_user_id", auth_user.id)
+            .execute()
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error consultando el perfil: {str(e)}"
+        )
 
     if not perfil_res.data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No se encontró el perfil del usuario.",
+            detail="No se encontró el perfil del usuario. Es posible que el registro no se haya completado correctamente.",
         )
 
-    usuario = perfil_res.data
-    rol_nombre = usuario.get("roles", {}).get("nombre") if usuario.get("roles") else None
+    usuario = perfil_res.data[0]
+    
+    # 3. Buscar el nombre del rol por separado para evitar fallos si no hay Foreign Key
+    rol_nombre = None
+    try:
+        if usuario.get("rol_id"):
+            rol_res = sb.table("roles").select("nombre").eq("id", usuario["rol_id"]).execute()
+            if rol_res.data:
+                rol_nombre = rol_res.data[0]["nombre"]
+    except Exception:
+        pass
 
     return AuthResponse(
         access_token=sign_in_res.session.access_token,
