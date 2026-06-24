@@ -48,12 +48,13 @@ def register(body: RegisterRequest):
             detail="No se pudo crear el usuario en el sistema de autenticación.",
         )
 
-    # 2. Buscar el rol_id por nombre en la tabla roles
+    # 2. Buscar el rol_id por nombre en la tabla roles (forzando primera mayúscula como está en la DB)
+    rol_formateado = body.rol_nombre.capitalize()
     try:
         rol_res = (
             sb.table("roles")
             .select("id, nombre")
-            .eq("nombre", body.rol_nombre)
+            .eq("nombre", rol_formateado)
             .execute()
         )
     except Exception as e:
