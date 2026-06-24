@@ -7,4 +7,4 @@ supabase>=2.0.0
 # Recommended for Database (Railway usually provides PostgreSQL)
 # sqlalchemy>=2.0.0
 # psycopg2-binary>=2.9.0
-# python-dotenv>=1.0.0
+python-dotenv>=1.0.0
