@@ -74,14 +74,14 @@ def register(body: RegisterRequest):
 
     rol = rol_res.data[0]
 
-    # 3. Insertar perfil en la tabla usuarios con estado = "activo"
+    # 3. Insertar perfil en la tabla usuarios con estado = "Aprobado"
     usuario_data = {
         "auth_user_id": auth_user.id,
         "nombres": body.nombres,
         "apellidos": body.apellidos,
         "telefono": body.telefono,
         "rol_id": rol["id"],
-        "estado": "activo",
+        "estado": "Aprobado",
     }
 
     try:
