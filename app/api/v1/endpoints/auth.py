@@ -104,7 +104,12 @@ def register(body: RegisterRequest):
     usuario = insert_res.data[0]
 
     # 4. Obtener access_token haciendo sign_in inmediatamente después del registro
-    sign_in_res = sb.auth.sign_in_with_password(
+    # Usamos un cliente efímero para no mutar el cliente admin global
+    from supabase import create_client
+    from app.core.config import settings
+    
+    ephemeral_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    sign_in_res = ephemeral_client.auth.sign_in_with_password(
         {"email": body.email, "password": body.password}
     )
 
@@ -143,8 +148,14 @@ def login(body: LoginRequest):
     sb = get_supabase_admin()
 
     # 1. Autenticar en Supabase Auth
+    # Usamos un cliente efímero para no mutar el token del cliente admin global
+    from supabase import create_client
+    from app.core.config import settings
+    
+    ephemeral_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    
     try:
-        sign_in_res = sb.auth.sign_in_with_password(
+        sign_in_res = ephemeral_client.auth.sign_in_with_password(
             {"email": body.email, "password": body.password}
         )
     except Exception as e:
