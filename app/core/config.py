@@ -11,6 +11,12 @@ class Settings(BaseSettings):
     # Railway provides DATABASE_URL environment variable natively for PostgreSQL
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 
+    # Supabase (útil si utilizas el cliente supabase-py para autenticación o storage)
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+    SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
+    # Service Role Key — solo backend, nunca exponer en el frontend
+    SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "")
+
     class Config:
         case_sensitive = True
         env_file = ".env"

@@ -2,6 +2,7 @@ fastapi>=0.103.0
 uvicorn[standard]>=0.23.2
 pydantic>=2.3.0
 pydantic-settings>=2.0.3
+supabase>=2.0.0
 
 # Recommended for Database (Railway usually provides PostgreSQL)
 # sqlalchemy>=2.0.0
